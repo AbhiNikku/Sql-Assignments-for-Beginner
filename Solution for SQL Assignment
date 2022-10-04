@@ -1,0 +1,181 @@
+------------------ Task 1 -----------------------------------------
+Create Table shopping_history (
+product Varchar(30) NOT NULL,
+quantity INTEGER NOT NULL,
+unit_price INTEGER NOT NULL
+);
+
+Insert into shopping_history(product,quantity,unit_price) values('milk',3,10),('bread',7,3),('bread',5,2);
+select product,sum(quantity*unit_price)
+from shopping_history group by product;
+
+
+---------------------------------Task 2 -------------------------------------------------
+
+Create table phones(
+Name varchar(30) not Null unique,
+phone_number INTEGER not Null unique);
+
+create table calls(
+id INTEGER not NULL,
+Caller INTEGER Not NUll,
+Callee INTEGER not NUll,
+Duration Integer Not Null,
+Unique(id));
+
+insert into phones(Name, phone_number) values ('Jack',1234),('Lena',3333),('Mark',9999),('Anna',7582);
+insert into calls(id,Caller,Callee,Duration) values (25,1234,7582,8),(7,9999,7582,1),(18,9999,3333,4),(2,7582,3333,3),(3,3333,1234,1),(21,333,1234,1);
+
+Select* from calls;
+
+update calls
+set caller = 3333 where caller = 333;
+
+Select p.Name
+from phones p cross join calls c where c.duration >= 10 group by Name;
+
+select  sum(duration), caller
+from calls group by caller;
+
+
+Create Table whole_calls as
+select id,caller as Phone_Num, Duration 
+from calls
+union all
+select id, callee as Phone_Num, Duration 
+from Calls;
+
+select sum(duration),phone_Num
+from whole_calls group by phone_Num ;
+
+select p.Name
+from phones p inner join whole_calls w on p.phone_number = w.phone_num
+group by Name having sum(w.duration) >= 10;
+
+select p.Name, sum(c.duration)
+from phones p inner join calls c on p.phone_number = c.caller inner join calls m on c.caller = m.callee
+group by Name
+having sum(c.duration) >= 10
+;
+
+With ssd as(
+select id,caller as Phone_Num, Duration 
+from calls
+union
+select id, callee as Phone_Num, Duration 
+from Calls)
+select p.Name,sum(w.duration)
+from phones p inner join ssd w on p.phone_number = w.phone_num
+group by Name having sum(w.duration) >= 10 order by Name asc;
+
+select caller as Phone_Num, Duration 
+from calls
+union
+select callee as Phone_Num, Duration 
+from Calls;
+
+
+create table calls1 like calls;
+insert into calls1(id,Caller,Callee,Duration) values (65,8003,9831,7),(100,9831,8003,3),(145,4315,9831,18);
+create table phones1 like phones;
+insert into phones1(Name, phone_number) values ('John',6356),('Addison',4315),('Kate',8003),('Ginny',9831);
+
+
+With tk3 as(
+select id,caller as Phone_Num, Duration 
+from calls1
+union
+select id, callee as Phone_Num, Duration 
+from Calls1)
+select p.Name,sum(w.duration)
+from phones1 p inner join tk3 w on p.phone_number = w.phone_num
+group by Name having sum(w.duration) >= 10 order by Name asc;
+
+
+------------------------task 3 ----------------------------------
+
+Create table Transactions(
+Amount INTEGER not null,
+Date Date Not Null);
+
+INSERT INTO transactions(Amount,Date) VALUES (1000,'2020-01-06');
+INSERT INTO transactions(Amount,Date) VALUES (-10,'2020-01-14');
+INSERT INTO transactions(Amount,Date) VALUES (-75,'2020-01-20');
+INSERT INTO transactions(Amount,Date) VALUES (-5,'2020-01-25');
+INSERT INTO transactions(Amount,Date) VALUES (-4,'2020-01-29');
+INSERT INTO transactions(Amount,Date) VALUES (2000,'2020-03-10');
+INSERT INTO transactions(Amount,Date) VALUES (-75,'2020-03-12');
+INSERT INTO transactions(Amount,Date) VALUES (-20,'2020-03-15');
+INSERT INTO transactions(Amount,Date) VALUES (40,'2020-03-15');
+INSERT INTO transactions(Amount,Date) VALUES (-50,'2020-03-17');
+INSERT INTO transactions(Amount,Date) VALUES (200,'2020-10-10');
+INSERT INTO transactions(Amount,Date) VALUES (-200,'2020-10-10');
+
+select * from transactions;
+
+With D as(
+select Count(distinct(to_char(Date,'MMMM'))) as Mon_Count from transactions where Amount < 0
+group by to_char(Date,'MMMM')
+Having Sum(Amount) <= -100 and Count(Amount) >=3),
+tm as(
+select (12 - zeroifnull(sum(D.Mon_Count)))*5 as ded from  D)
+,tr as(
+Select sum(amount) as ff
+from transactions)
+Select tr.ff - tm.ded from tr,tm;
+ 
+ 
+Create table Transactions1 like transactions;
+
+
+INSERT INTO transactions1(Amount,Date) VALUES
+(1,'2020-06-29'),
+(35,'2020-02-20'),
+(-50,'2020-02-03'),
+(-1,'2020-02-26'),
+(-200,'2020-08-01'),
+(-44,'2020-02-07'),
+(-5,'2020-02-25'),
+(1,'2020-06-29'),
+(1,'2020-06-29'),
+(-100,'2020-12-29'),
+(-100,'2020-12-30'),
+(-100,'2020-12-31')
+;
+
+select * from transactions1;
+
+With D as(
+select Count(distinct(to_char(Date,'MMMM'))) as Mon_Count from transactions1 where Amount < 0
+group by to_char(Date,'MMMM')
+Having Sum(Amount) <= -100 and Count(Amount) >=3),
+tm as(
+select (12 - zeroifnull(sum(D.Mon_Count)))*5 as ded from  D)
+,tr as(
+Select sum(amount) as ff
+from transactions1)
+
+Select tr.ff - tm.ded from tr,tm;
+
+
+INSERT INTO transactions2(Amount,Date) VALUES
+(6000,'2020-04-03'),
+(5000,'2020-04-02'),
+(4000,'2020-04-01'),
+(3000,'2020-03-01'),
+(2000,'2020-02-01'),
+(1000,'2020-01-01');
+
+
+select * from transactions2;
+With D as(
+select Count(distinct(to_char(Date,'MMMM'))) as Mon_Count from transactions2 where Amount < 0
+group by to_char(Date,'MMMM')
+Having Sum(Amount) <= -100 and Count(Amount) >=3),
+tm as(
+select (12 - zeroifnull(sum(D.Mon_Count)))*5 as ded from  D)
+,tr as(
+Select sum(amount) as ff
+from transactions2)
+
+Select tr.ff - tm.ded from tr,tm;
